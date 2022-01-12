@@ -58,6 +58,29 @@ module.exports = {
     await puppeteer.metamaskWindow().waitForTimeout(2000);
     return true;
   },
+  async createAccount(accountName) {
+    if (accountName) {
+      accountName = accountName.toLowerCase();
+    }
+
+    await switchToMetamaskIfNotActive();
+
+    await puppeteer.waitAndClick(mainPageElements.accountMenu.button);
+    await puppeteer.waitAndClick(
+      mainPageElements.accountMenu.createAccountButton
+    );
+
+    if (accountName) {
+      await puppeteer.waitAndType(
+        mainPageElements.createAccount.input,
+        accountName
+      );
+    }
+    await puppeteer.waitAndClick(mainPageElements.createAccount.createButton);
+
+    await switchToCypressIfNotActive();
+    return true;
+  },
 
   async confirmWelcomePage() {
     await module.exports.fixBlankPage();
@@ -309,6 +332,7 @@ module.exports = {
     await puppeteer.waitAndClick(mainPageElements.accountModal.closeButton);
     return walletAddress;
   },
+
   async initialSetup({ secretWords, network, password }) {
     const isCustomNetwork =
       process.env.NETWORK_NAME && process.env.RPC_URL && process.env.CHAIN_ID;
@@ -339,3 +363,19 @@ module.exports = {
     }
   },
 };
+
+async function switchToMetamaskIfNotActive() {
+  if (await puppeteer.isCypressWindowActive()) {
+    await puppeteer.switchToMetamaskWindow();
+    switchBackToCypressWindow = true;
+  }
+  return switchBackToCypressWindow;
+}
+
+async function switchToCypressIfNotActive() {
+  if (switchBackToCypressWindow) {
+    await puppeteer.switchToCypressWindow();
+    switchBackToCypressWindow = false;
+  }
+  return switchBackToCypressWindow;
+}

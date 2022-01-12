@@ -99,7 +99,10 @@ module.exports = (on, config) => {
       await puppeteer.switchToMetamaskWindow();
       return imported;
     },
-
+    async createMetamaskAccount(accountName) {
+      const created = await metamask.createAccount(accountName);
+      return created;
+    },
     async addMetamaskNetwork(network) {
       const networkAdded = await metamask.addNetwork(network);
       return networkAdded;

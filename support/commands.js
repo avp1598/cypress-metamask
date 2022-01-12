@@ -68,6 +68,10 @@ Cypress.Commands.add("rejectMetamaskPermissionToSpend", () => {
   return cy.task("rejectMetamaskPermissionToSpend");
 });
 
+Cypress.Commands.add("createMetamaskAccount", (accountName) => {
+  return cy.task("createMetamaskAccount", accountName);
+});
+
 Cypress.Commands.add("switchToMetamaskNotification", () => {
   return cy.task("switchToMetamaskNotification");
 });
