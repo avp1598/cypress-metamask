@@ -1,21 +1,22 @@
-const puppeteer = require('./puppeteer');
+const puppeteer = require("./puppeteer");
 
-const { pageElements } = require('../pages/metamask/page');
+const { pageElements } = require("../pages/metamask/page");
 const {
   welcomePageElements,
   firstTimeFlowPageElements,
   metametricsPageElements,
   firstTimeFlowFormPageElements,
   endOfFlowPageElements,
-} = require('../pages/metamask/first-time-flow-page');
-const { mainPageElements } = require('../pages/metamask/main-page');
-const { unlockPageElements } = require('../pages/metamask/unlock-page');
+} = require("../pages/metamask/first-time-flow-page");
+const { mainPageElements } = require("../pages/metamask/main-page");
+const { unlockPageElements } = require("../pages/metamask/unlock-page");
 const {
   notificationPageElements,
   permissionsPageElements,
   confirmPageElements,
-} = require('../pages/metamask/notification-page');
-const { setNetwork, getNetwork } = require('./helpers');
+  signaturePageElements,
+} = require("../pages/metamask/notification-page");
+const { setNetwork, getNetwork } = require("./helpers");
 
 let walletAddress;
 
@@ -38,19 +39,25 @@ module.exports = {
     }
   },
   async changeAccount(number) {
-    await puppeteer.waitAndClick(mainPageElements.accountMenu.button)
-    await puppeteer.changeAccount(number)
+    await puppeteer.waitAndClick(mainPageElements.accountMenu.button);
+    await puppeteer.changeAccount(number);
   },
 
   async importMetaMaskWalletUsingPrivateKey(key) {
     await puppeteer.waitAndClick(mainPageElements.accountMenu.button);
-    await puppeteer.waitAndClickByText('.account-menu__item__text', 'Import Account');
-    await puppeteer.waitAndType('#private-key-box', key);
+    await puppeteer.waitAndClickByText(
+      ".account-menu__item__text",
+      "Import Account"
+    );
+    await puppeteer.waitAndType("#private-key-box", key);
     await puppeteer.metamaskWindow().waitForTimeout(500);
-    await puppeteer.waitAndClickByText(mainPageElements.accountMenu.importButton, 'Import');
+    await puppeteer.waitAndClickByText(
+      mainPageElements.accountMenu.importButton,
+      "Import"
+    );
     await puppeteer.metamaskWindow().waitForTimeout(2000);
     return true;
-},
+  },
 
   async confirmWelcomePage() {
     await module.exports.fixBlankPage();
@@ -69,15 +76,15 @@ module.exports = {
     await puppeteer.waitAndClick(metametricsPageElements.optOutAnalyticsButton);
     await puppeteer.waitAndType(
       firstTimeFlowFormPageElements.secretWordsInput,
-      secretWords,
+      secretWords
     );
     await puppeteer.waitAndType(
       firstTimeFlowFormPageElements.passwordInput,
-      password,
+      password
     );
     await puppeteer.waitAndType(
       firstTimeFlowFormPageElements.confirmPasswordInput,
-      password,
+      password
     );
     await puppeteer.waitAndClick(firstTimeFlowFormPageElements.termsCheckbox);
     await puppeteer.waitAndClick(firstTimeFlowFormPageElements.importButton);
@@ -96,56 +103,54 @@ module.exports = {
     return true;
   },
 
-
-
   async changeNetwork(network) {
     setNetwork(network);
     await puppeteer.waitAndClick(mainPageElements.networkSwitcher.button);
-    if (network === 'main' || network === 'mainnet') {
+    if (network === "main" || network === "mainnet") {
       await puppeteer.waitAndClick(
-        mainPageElements.networkSwitcher.networkButton(0),
+        mainPageElements.networkSwitcher.networkButton(0)
       );
-    } else if (network === 'ropsten') {
+    } else if (network === "ropsten") {
       await puppeteer.waitAndClick(
-        mainPageElements.networkSwitcher.networkButton(1),
+        mainPageElements.networkSwitcher.networkButton(1)
       );
-    } else if (network === 'kovan') {
+    } else if (network === "kovan") {
       await puppeteer.waitAndClick(
-        mainPageElements.networkSwitcher.networkButton(2),
+        mainPageElements.networkSwitcher.networkButton(2)
       );
-    } else if (network === 'rinkeby') {
+    } else if (network === "rinkeby") {
       await puppeteer.waitAndClick(
-        mainPageElements.networkSwitcher.networkButton(3),
+        mainPageElements.networkSwitcher.networkButton(3)
       );
-    } else if (network === 'goerli') {
+    } else if (network === "goerli") {
       await puppeteer.waitAndClick(
-        mainPageElements.networkSwitcher.networkButton(4),
+        mainPageElements.networkSwitcher.networkButton(4)
       );
-    } else if (network === 'localhost') {
+    } else if (network === "localhost") {
       await puppeteer.waitAndClick(
-        mainPageElements.networkSwitcher.networkButton(5),
+        mainPageElements.networkSwitcher.networkButton(5)
       );
-    } else if (typeof network === 'object') {
+    } else if (typeof network === "object") {
       await puppeteer.waitAndClickByText(
         mainPageElements.networkSwitcher.dropdownMenuItem,
-        network.networkName,
+        network.networkName
       );
     } else {
       await puppeteer.waitAndClickByText(
         mainPageElements.networkSwitcher.dropdownMenuItem,
-        network,
+        network
       );
     }
 
-    if (typeof network === 'object') {
+    if (typeof network === "object") {
       await puppeteer.waitForText(
         mainPageElements.networkSwitcher.networkName,
-        network.networkName,
+        network.networkName
       );
     } else {
       await puppeteer.waitForText(
         mainPageElements.networkSwitcher.networkName,
-        network,
+        network
       );
     }
 
@@ -170,39 +175,39 @@ module.exports = {
     await puppeteer.waitAndClick(mainPageElements.accountMenu.settingsButton);
     await puppeteer.waitAndClick(mainPageElements.settingsPage.networksButton);
     await puppeteer.waitAndClick(
-      mainPageElements.networksPage.addNetworkButton,
+      mainPageElements.networksPage.addNetworkButton
     );
     await puppeteer.waitAndType(
       mainPageElements.addNetworkPage.networkNameInput,
-      network.networkName,
+      network.networkName
     );
     await puppeteer.waitAndType(
       mainPageElements.addNetworkPage.rpcUrlInput,
-      network.rpcUrl,
+      network.rpcUrl
     );
     await puppeteer.waitAndType(
       mainPageElements.addNetworkPage.chainIdInput,
-      network.chainId,
+      network.chainId
     );
 
     if (network.symbol) {
       await puppeteer.waitAndType(
         mainPageElements.addNetworkPage.symbolInput,
-        network.symbol,
+        network.symbol
       );
     }
 
     if (network.blockExplorer) {
       await puppeteer.waitAndType(
         mainPageElements.addNetworkPage.blockExplorerInput,
-        network.blockExplorer,
+        network.blockExplorer
       );
     }
     await puppeteer.waitAndClick(mainPageElements.addNetworkPage.saveButton);
     await puppeteer.waitAndClick(mainPageElements.networksPage.closeButton);
     await puppeteer.waitForText(
       mainPageElements.networkSwitcher.networkName,
-      network.networkName,
+      network.networkName
     );
     return true;
   },
@@ -210,37 +215,41 @@ module.exports = {
     await puppeteer.metamaskWindow().waitForTimeout(3000);
     const notificationPage = await puppeteer.switchToMetamaskNotification();
     await puppeteer.waitAndClick(
+      notificationPageElements.acceptAllCheckbox,
+      notificationPage
+    );
+    await puppeteer.waitAndClick(
       notificationPageElements.nextButton,
-      notificationPage,
+      notificationPage
     );
     await puppeteer.waitAndClick(
       permissionsPageElements.connectButton,
-      notificationPage,
+      notificationPage
     );
     await puppeteer.metamaskWindow().waitForTimeout(3000);
     return true;
   },
   async confirmTransaction() {
-    const isKovanTestnet = getNetwork().networkName === 'kovan';
+    const isKovanTestnet = getNetwork().networkName === "kovan";
     await puppeteer.metamaskWindow().waitForTimeout(3000);
     const notificationPage = await puppeteer.switchToMetamaskNotification();
     const currentGasFee = await puppeteer.waitAndGetValue(
       confirmPageElements.gasFeeInput,
-      notificationPage,
+      notificationPage
     );
     const newGasFee = isKovanTestnet
-      ? '1'
+      ? "1"
       : (Number(currentGasFee) + 10).toString();
     await puppeteer.waitAndSetValue(
       newGasFee,
       confirmPageElements.gasFeeInput,
-      notificationPage,
+      notificationPage
     );
     // metamask reloads popup after changing a fee, you have to wait for this event otherwise transaction will fail
     await puppeteer.metamaskWindow().waitForTimeout(3000);
     await puppeteer.waitAndClick(
       confirmPageElements.confirmButton,
-      notificationPage,
+      notificationPage
     );
     await puppeteer.metamaskWindow().waitForTimeout(3000);
     return true;
@@ -250,16 +259,52 @@ module.exports = {
     const notificationPage = await puppeteer.switchToMetamaskNotification();
     await puppeteer.waitAndClick(
       confirmPageElements.rejectButton,
-      notificationPage,
+      notificationPage
     );
     await puppeteer.metamaskWindow().waitForTimeout(3000);
+    return true;
+  },
+  confirmSignatureRequest: async () => {
+    const notificationPage = await puppeteer.switchToMetamaskNotification();
+    await puppeteer.waitAndClick(
+      signaturePageElements.confirmSignatureRequestButton,
+      notificationPage
+    );
+    await puppeteer.metamaskWindow().waitForTimeout(3000);
+    return true;
+  },
+  rejectSignatureRequest: async () => {
+    const notificationPage = await puppeteer.switchToMetamaskNotification();
+    await puppeteer.waitAndClick(
+      signaturePageElements.rejectSignatureRequestButton,
+      notificationPage
+    );
+    await puppeteer.metamaskWindow().waitForTimeout(1000);
+    return true;
+  },
+  confirmPermissionToSpend: async () => {
+    const notificationPage = await puppeteer.switchToMetamaskNotification();
+    await puppeteer.waitAndClick(
+      notificationPageElements.allowToSpendButton,
+      notificationPage
+    );
+    await puppeteer.metamaskWindow().waitForTimeout(3000);
+    return true;
+  },
+  rejectPermissionToSpend: async () => {
+    const notificationPage = await puppeteer.switchToMetamaskNotification();
+    await puppeteer.waitAndClick(
+      notificationPageElements.rejectToSpendButton,
+      notificationPage
+    );
+    await puppeteer.metamaskWindow().waitForTimeout(1000);
     return true;
   },
   async getWalletAddress() {
     await puppeteer.waitAndClick(mainPageElements.options.button);
     await puppeteer.waitAndClick(mainPageElements.options.accountDetailsButton);
     walletAddress = await puppeteer.waitAndGetValue(
-      mainPageElements.accountModal.walletAddressInput,
+      mainPageElements.accountModal.walletAddressInput
     );
     await puppeteer.waitAndClick(mainPageElements.accountModal.closeButton);
     return walletAddress;
@@ -271,7 +316,7 @@ module.exports = {
     await puppeteer.init();
     await puppeteer.assignWindows();
     await puppeteer.metamaskWindow().waitForTimeout(1000);
-    await puppeteer.metamaskWindow().bringToFront()
+    await puppeteer.metamaskWindow().bringToFront();
     if (
       (await puppeteer.metamaskWindow().$(unlockPageElements.unlockPage)) ===
       null

@@ -1,56 +1,55 @@
 /// <reference types="cypress" />
 // import helpers from "../support/helpers";
-require('dotenv').config()
-const helpers = require('../support/helpers')
-const puppeteer = require('../support/puppeteer');
-const metamask = require('../support/metamask');
+require("dotenv").config();
+const helpers = require("../support/helpers");
+const puppeteer = require("../support/puppeteer");
+const metamask = require("../support/metamask");
 /**
  * @type {Cypress.PluginConfig}
  */
 // eslint-disable-next-line no-unused-vars
 module.exports = (on, config) => {
-  on('before:browser:launch', async (browser = {}, arguments_) => {
-    console.log('Loading MetaMask Extension')
-    if (browser.name === 'chrome' && browser.isHeadless) {
-      console.log('TRUE'); // required by cypress ¯\_(ツ)_/¯
-      arguments_.args.push('--window-size=1920,1080');
+  on("before:browser:launch", async (browser = {}, arguments_) => {
+    console.log("Loading MetaMask Extension");
+    if (browser.name === "chrome" && browser.isHeadless) {
+      console.log("TRUE"); // required by cypress ¯\_(ツ)_/¯
+      arguments_.args.push("--window-size=1920,1080");
       return arguments_;
     }
 
-    if (browser.name === 'electron') {
-      arguments_['width'] = 1920;
-      arguments_['height'] = 1080;
-      arguments_['resizable'] = false;
+    if (browser.name === "electron") {
+      arguments_["width"] = 1920;
+      arguments_["height"] = 1080;
+      arguments_["resizable"] = false;
       return arguments_;
     }
 
     // metamask welcome screen blocks cypress from loading
-    if (browser.name === 'chrome') {
+    if (browser.name === "chrome") {
       arguments_.args.push(
         // '--auto-open-devtools-for-tabs',
-        '--remote-debugging-port=9222',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding',
+        "--remote-debugging-port=9222",
+        "--disable-background-timer-throttling",
+        "--disable-backgrounding-occluded-windows",
+        "--disable-renderer-backgrounding"
       );
     }
 
     // NOTE: extensions cannot be loaded in headless Chrome
     const metamaskPath = await helpers.prepareMetamask(
-      process.env.METAMASK_VERSION || '9.4.0',
+      process.env.METAMASK_VERSION || "9.4.0"
     );
     arguments_.extensions.push(metamaskPath);
     return arguments_;
   });
 
-
-  on('task', {
+  on("task", {
     error(message) {
-      console.error('\u001B[31m', 'ERROR:', message, '\u001B[0m');
+      console.error("\u001B[31m", "ERROR:", message, "\u001B[0m");
       return true;
     },
     warn(message) {
-      console.warn('\u001B[33m', 'WARNING:', message, '\u001B[0m');
+      console.warn("\u001B[33m", "WARNING:", message, "\u001B[0m");
       return true;
     },
     async initPuppeteer() {
@@ -98,9 +97,9 @@ module.exports = (on, config) => {
       await puppeteer.switchToMetamaskWindow();
       const imported = await metamask.importMetaMaskWalletUsingPrivateKey(key);
       await puppeteer.switchToMetamaskWindow();
-      return imported
+      return imported;
     },
-    
+
     async addMetamaskNetwork(network) {
       const networkAdded = await metamask.addNetwork(network);
       return networkAdded;
@@ -109,7 +108,7 @@ module.exports = (on, config) => {
       if (process.env.NETWORK_NAME) {
         network = process.env.NETWORK_NAME;
       } else {
-        network = 'kovan';
+        network = "kovan";
       }
       const networkChanged = await metamask.changeNetwork(network);
       return networkChanged;
@@ -126,6 +125,22 @@ module.exports = (on, config) => {
       const rejected = await metamask.rejectTransaction();
       return rejected;
     },
+    async confirmMetamaskSignatureRequest() {
+      const confirmed = await metamask.confirmSignatureRequest();
+      return confirmed;
+    },
+    async rejectMetamaskSignatureRequest() {
+      const rejected = await metamask.rejectSignatureRequest();
+      return rejected;
+    },
+    async confirmMetamaskPermissionToSpend() {
+      const confirmed = await metamask.confirmPermissionToSpend();
+      return confirmed;
+    },
+    async rejectMetamaskPermissionToSpend() {
+      const rejected = await metamask.rejectPermissionToSpend();
+      return rejected;
+    },
     async getMetamaskWalletAddress() {
       const walletAddress = await metamask.getWalletAddress();
       return walletAddress;
@@ -136,7 +151,7 @@ module.exports = (on, config) => {
     async setupMetamask({ secretWords, network, password }) {
       if (puppeteer.metamaskWindow()) {
         await puppeteer.switchToCypressWindow();
-        return true
+        return true;
       } else {
         if (process.env.NETWORK_NAME) {
           network = process.env.NETWORK_NAME;
@@ -156,7 +171,7 @@ module.exports = (on, config) => {
       await puppeteer.switchToMetamaskWindow();
       await metamask.changeAccount(number);
       await puppeteer.switchToCypressWindow();
-      return null
+      return null;
     },
 
     getNetwork() {
@@ -166,8 +181,8 @@ module.exports = (on, config) => {
     async addNetwork() {
       const network = metamask.addNetwork();
       return network;
-    }
+    },
   });
 
   return config;
-}
+};

@@ -1,7 +1,10 @@
-const notificationPage = '.notification';
+const notificationPage = ".notification";
 const nextButton = `${notificationPage} .permissions-connect-choose-account__bottom-buttons button:nth-child(2)`;
+const acceptAllCheckbox = `${notificationPage} .permissions-connect-choose-account__header-check-box`;
+const allowToSpendButton = `${notificationPage} [data-testid="page-container-footer-next"]`;
+const rejectToSpendButton = `${notificationPage} [data-testid="page-container-footer-cancel"]`;
 
-const permissionsPage = '.permissions-connect';
+const permissionsPage = ".permissions-connect";
 const connectButton = `${permissionsPage} .permission-approval-container__footers button:nth-child(2)`;
 
 const confirmPageHeader = `${notificationPage} .confirm-page-container-header`;
@@ -14,9 +17,19 @@ const totalLabel = `${confirmPageContent} div:nth-child(2) > .confirm-detail-row
 const rejectButton = `${confirmPageContent} [data-testid="page-container-footer-cancel"]`;
 const confirmButton = `${confirmPageContent} [data-testid="page-container-footer-next"]`;
 
+const confirmSignatureRequestButton = `${notificationPage} .request-signature__footer__sign-button`;
+const rejectSignatureRequestButton = `${notificationPage} .request-signature__footer__cancel-button`;
+module.exports.signaturePageElements = {
+  confirmSignatureRequestButton,
+  rejectSignatureRequestButton,
+};
+
 module.exports.notificationPageElements = {
   notificationPage,
   nextButton,
+  acceptAllCheckbox,
+  allowToSpendButton,
+  rejectToSpendButton,
 };
 
 module.exports.permissionsPageElements = {
