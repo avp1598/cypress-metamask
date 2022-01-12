@@ -100,6 +100,7 @@ module.exports = (on, config) => {
       return imported;
     },
     async createMetamaskAccount(accountName) {
+      // create account
       const created = await metamask.createAccount(accountName);
       return created;
     },
