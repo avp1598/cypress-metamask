@@ -1,9 +1,10 @@
-const puppeteer = require('puppeteer-core');
-const fetch = require('node-fetch');
+const puppeteer = require("puppeteer-core");
+const fetch = require("node-fetch");
 
 let puppeteerBrowser;
 let mainWindow;
 let metamaskWindow;
+let activeTabName;
 
 module.exports = {
   puppeteerBrowser() {
@@ -15,8 +16,11 @@ module.exports = {
   metamaskWindow() {
     return metamaskWindow;
   },
+  activeTabName: () => {
+    return activeTabName;
+  },
   async init() {
-    const debuggerDetails = await fetch('http://localhost:9222/json/version'); //DevSkim: ignore DS137138
+    const debuggerDetails = await fetch("http://localhost:9222/json/version"); //DevSkim: ignore DS137138
     const debuggerDetailsConfig = await debuggerDetails.json();
     const webSocketDebuggerUrl = debuggerDetailsConfig.webSocketDebuggerUrl;
 
@@ -30,12 +34,16 @@ module.exports = {
   async assignWindows() {
     let pages = await puppeteerBrowser.pages();
     for (const page of pages) {
-      if (page.url().includes('integration')) {
+      if (page.url().includes("integration")) {
         mainWindow = page;
-      } else if (page.url().includes('extension')) {
+      } else if (page.url().includes("extension")) {
         metamaskWindow = page;
       }
     }
+    return true;
+  },
+  assignActiveTabName: async (tabName) => {
+    activeTabName = tabName;
     return true;
   },
   async getBrowser() {
@@ -51,16 +59,33 @@ module.exports = {
   },
   async switchToCypressWindow() {
     await mainWindow.bringToFront();
+    await module.exports.assignActiveTabName("cypress");
     return true;
   },
   async switchToMetamaskWindow() {
     await metamaskWindow.bringToFront();
+    await module.exports.assignActiveTabName("metmask");
     return true;
   },
+  isMetamaskWindowActive: async () => {
+    if (activeTabName === "metamask") {
+      return true;
+    } else {
+      return false;
+    }
+  },
+  isCypressWindowActive: async () => {
+    if (activeTabName === "cypress") {
+      return true;
+    } else {
+      return false;
+    }
+  },
   async switchToMetamaskNotification() {
+    await module.exports.metamaskWindow().waitForTimeout(3000);
     let pages = await puppeteerBrowser.pages();
     for (const page of pages) {
-      if (page.url().includes('notification')) {
+      if (page.url().includes("notification")) {
         await page.bringToFront();
         return page;
       }
@@ -69,7 +94,7 @@ module.exports = {
   async waitFor(selector, page = metamaskWindow) {
     await page.waitForFunction(
       `document.querySelector('${selector}') && document.querySelector('${selector}').clientHeight != 0`,
-      { visible: true },
+      { visible: true }
     );
     // puppeteer going too fast breaks metamask in corner cases
     await page.waitForTimeout(300);
@@ -78,18 +103,19 @@ module.exports = {
   async changeAccount(number, page = metamaskWindow) {
     await page.evaluate(
       ({ number }) => {
-        const selector = document.querySelector('.account-menu__accounts').children[number.number - 1]
-        selector.click()
+        const selector = document.querySelector(".account-menu__accounts")
+          .children[number.number - 1];
+        selector.click();
       },
       { number }
-    )
+    );
   },
 
   async waitAndClick(selector, page = metamaskWindow) {
     await module.exports.waitFor(selector, page);
     await page.evaluate(
-      selector => document.querySelector(selector).click(),
-      selector,
+      (selector) => document.querySelector(selector).click(),
+      selector
     );
   },
 
@@ -115,15 +141,15 @@ module.exports = {
   async waitAndGetValue(selector, page = metamaskWindow) {
     await module.exports.waitFor(selector, page);
     const element = await page.$(selector);
-    const property = await element.getProperty('value');
+    const property = await element.getProperty("value");
     const value = await property.jsonValue();
     return value;
   },
   async waitAndSetValue(text, selector, page = metamaskWindow) {
     await module.exports.waitFor(selector, page);
     await page.evaluate(
-      selector => (document.querySelector(selector).value = ''),
-      selector,
+      (selector) => (document.querySelector(selector).value = ""),
+      selector
     );
     await page.focus(selector);
     await page.keyboard.type(text);
@@ -131,7 +157,7 @@ module.exports = {
   async waitForText(selector, text, page = metamaskWindow) {
     await module.exports.waitFor(selector, page);
     await page.waitForFunction(
-      `document.querySelector('${selector}').innerText.toLowerCase().includes('${text}')`,
+      `document.querySelector('${selector}').innerText.toLowerCase().includes('${text.toLowerCase()}')`
     );
   },
 };

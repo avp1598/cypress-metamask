@@ -19,6 +19,7 @@ const {
 const { setNetwork, getNetwork } = require("./helpers");
 
 let walletAddress;
+let switchBackToCypressWindow;
 
 module.exports = {
   walletAddress: () => {
@@ -180,6 +181,7 @@ module.exports = {
     return true;
   },
   async addNetwork(network) {
+    await switchToMetamaskIfNotActive();
     if (
       process.env.NETWORK_NAME &&
       process.env.RPC_URL &&
@@ -219,7 +221,6 @@ module.exports = {
         network.symbol
       );
     }
-
     if (network.blockExplorer) {
       await puppeteer.waitAndType(
         mainPageElements.addNetworkPage.blockExplorerInput,
@@ -228,10 +229,12 @@ module.exports = {
     }
     await puppeteer.waitAndClick(mainPageElements.addNetworkPage.saveButton);
     await puppeteer.waitAndClick(mainPageElements.networksPage.closeButton);
+    setNetwork(network);
     await puppeteer.waitForText(
       mainPageElements.networkSwitcher.networkName,
       network.networkName
     );
+    await switchToCypressIfNotActive();
     return true;
   },
   async acceptAccess() {
