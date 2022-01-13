@@ -240,6 +240,7 @@ module.exports = {
   async acceptAccess() {
     await puppeteer.metamaskWindow().waitForTimeout(3000);
     const notificationPage = await puppeteer.switchToMetamaskNotification();
+    // accept all accounts
     await puppeteer.waitAndClick(
       notificationPageElements.acceptAllCheckbox,
       notificationPage
